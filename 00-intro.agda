@@ -163,7 +163,12 @@ module MonotoneThing where
     field
       preserves : {x x' : Obj D} -> _<=_ D x x' -> _<=_ E (F x) (F x')
 
--- chains?
+Sequence : (X : Set) -> Set
+Sequence X = (n : Nat) -> X
+
+Chain : PartialOrd -> Set
+Chain ord = Sequence Obj >< \ f -> (n : Nat) -> f n <= f (suc n)
+  where open PartialOrd ord
 
 -- least upper bounds
 

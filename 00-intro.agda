@@ -52,36 +52,38 @@ data Nat : Set where
   suc : Nat -> Nat
 
 {-# BUILTIN NATURAL Nat #-}
-
-data _<=_ : Nat -> Nat -> Set where
-  oz : 0 <= 0
-  os : {n m : Nat} -> n <= m -> suc n <= suc m
-  o' : {n m : Nat} -> n <= m -> n <= suc m
-
 data _+_ (X Y : Set) : Set where
   inl : X -> X + Y
   inr : Y -> X + Y
 
-Maybe : Set -> Set
-Maybe X = One + X
+infixr 30 _+_
 
-or : {n : Nat} -> n <= n
+data Maybe (X : Set) : Set where
+  no : Maybe X
+  yes : X -> Maybe X
+
+data _<N=_ : Nat -> Nat -> Set where
+  oz : 0 <N= 0
+  os : {n m : Nat} -> n <N= m -> suc n <N= suc m
+  o' : {n m : Nat} -> n <N= m -> n <N= suc m
+
+or : {n : Nat} -> n <N= n
 or {zero} = oz
 or {suc n} = os or
 
-th-trans : {n m k : Nat} -> n <= m -> m <= k -> n <= k
-th-trans oz m<=k = m<=k
-th-trans (os n<=m) (os m<=k) = os (th-trans n<=m m<=k)
-th-trans (os n<=m) (o' m<=k) = os (th-trans (o' n<=m) m<=k)
-th-trans (o' n<=m) (os m<=k) = o' (th-trans n<=m m<=k)
-th-trans (o' n<=m) (o' m<=k) = o' (th-trans (o' n<=m) m<=k)
+<N=-trans : {n m k : Nat} -> n <N= m -> m <N= k -> n <N= k
+<N=-trans oz m<N=k = m<N=k
+<N=-trans (os n<N=m) (os m<N=k) = os (<N=-trans n<N=m m<N=k)
+<N=-trans (os n<N=m) (o' m<N=k) = os (<N=-trans (o' n<N=m) m<N=k)
+<N=-trans (o' n<N=m) (os m<N=k) = o' (<N=-trans n<N=m m<N=k)
+<N=-trans (o' n<N=m) (o' m<N=k) = o' (<N=-trans (o' n<N=m) m<N=k)
 
-<=-suc-swap-impossible : {n m : Nat} -> n <= m -> suc m <= n -> Zero
-<=-suc-swap-impossible th0 (os th1) = <=-suc-swap-impossible th1 th0
-<=-suc-swap-impossible th0 (o' th1) = <=-suc-swap-impossible (th-trans (o' or) th0) th1
+<N=-suc-swap-impossible : {n m : Nat} -> n <N= m -> suc m <N= n -> Zero
+<N=-suc-swap-impossible th0 (os th1) = <N=-suc-swap-impossible th1 th0
+<N=-suc-swap-impossible th0 (o' th1) = <N=-suc-swap-impossible (<N=-trans (o' or) th0) th1
 
-<=-suc-refl-impossible : {n : Nat} -> suc n <= n -> Zero
-<=-suc-refl-impossible n<=sucn = <=-suc-swap-impossible or n<=sucn
+<N=-suc-refl-impossible : {n : Nat} -> suc n <N= n -> Zero
+<N=-suc-refl-impossible n<N=sucn = <N=-suc-swap-impossible or n<N=sucn
 
 record PartialOrd (X : Set) (_<=_ : X -> X -> Set) : Set where
   field
@@ -89,29 +91,20 @@ record PartialOrd (X : Set) (_<=_ : X -> X -> Set) : Set where
     <=-trans : {x y z : X} -> x <= y -> y <= z -> x <= z
     <=-antisym : {x y : X} -> x <= y -> y <= x -> x == y
 
-Nats<=PartialOrd : PartialOrd Nat _<=_
-Nats<=PartialOrd =
+Nats<N=PartialOrd : PartialOrd Nat _<N=_
+Nats<N=PartialOrd =
   record
     { <=-refl = or
-    ; <=-trans = th-trans
+    ; <=-trans = <N=-trans
     ; <=-antisym = help-antisym
     }
     where
-    help-antisym : {n m : Nat} -> n <= m -> m <= n -> n == m
+    help-antisym : {n m : Nat} -> n <N= m -> m <N= n -> n == m
     help-antisym oz oz = refl
-    help-antisym (os n<=m) (os m<=n) = suc $= help-antisym n<=m m<=n
-    help-antisym (os n<=m) (o' m<=n) = naughte (<=-suc-swap-impossible n<=m m<=n)
-    help-antisym (o' n<=m) (os m<=n) = naughte (<=-suc-swap-impossible m<=n n<=m)
-    help-antisym (o' n<=m) (o' m<=n) = naughte (<=-suc-refl-impossible (th-trans (o' n<=m) m<=n))
-
-
-
-
--- need to define partial functions !!!
--- functions Nat -> Nat are PO
---NatFuncsPartialOrd : PartialOrd (Nat -> Maybe Nat) λ f g → (n : Nat) -> (f n == no) + Sg Nat \ m -> (f n == yes m) * (g n == yes m)
---NatFuncsPartialOrd = {!!}
-
+    help-antisym (os n<N=m) (os m<N=n) = suc $= help-antisym n<N=m m<N=n
+    help-antisym (os n<N=m) (o' m<N=n) = naughte (<N=-suc-swap-impossible n<N=m m<N=n)
+    help-antisym (o' n<N=m) (os m<N=n) = naughte (<N=-suc-swap-impossible m<N=n n<N=m)
+    help-antisym (o' n<N=m) (o' m<N=n) = naughte (<N=-suc-refl-impossible (<N=-trans (o' n<N=m) m<N=n))
 
 
 

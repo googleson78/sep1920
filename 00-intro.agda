@@ -2,21 +2,27 @@
 
 module 00-intro where
 
+-- empty type - impossible to construct - contradiction
 data Zero : Set where
 
+-- eliminator for the empty type (zero - naught - naughtElim - naughte)
 naughte : {X : Set} -> Zero -> X
 naughte ()
 
+-- the type with only one element - trivial to construct - truth
 record One : Set where
   constructor <>
 
+-- a thing is equal to another thing only if they are exactly one and the same
 data _==_ {X : Set} (x : X) : X -> Set where
   refl : x == x
 
+-- allow for "rewrite construct"
 {-# BUILTIN EQUALITY _==_ #-}
 
 infix 20 _==_
 
+-- some == lifting utils
 _=$=_ : {X Y : Set} {f g : X -> Y}{x y : X} -> f == g -> x == y -> f x == g y
 refl =$= refl = refl
 
@@ -26,6 +32,8 @@ f $= x = refl =$= x
 _=$ : {X Y : Set} {f g : X -> Y}{x : X} -> f == g -> f x == g x
 f =$ = f =$= refl
 
+-- well I actually lied about things being equal only when they are exactly the same
+-- two functions are equal if they are pointwise equal
 postulate
   ext : {X Y : Set} {f g : X -> Y} -> ((x : X) -> f x == g x) -> f == g
 
@@ -35,33 +43,45 @@ postulate
 ==-sym : {X : Set} {x y : X} -> x == y -> y == x
 ==-sym refl = refl
 
+-- a dependent pair - the type of the second element *can* depend on the value of the first
+-- useful for "predicate holding things" - values that have a predicate attached to them
+-- e.g. Nat >< \ p -> Prime p
+-- would be a natural number, along with proof that it is prime
 record _><_ (X : Set) (P : X -> Set) : Set where
   constructor _,_
   field
     fst : X
     snd : P fst
 
+-- non-dependent pairs
 _*_ : (X Y : Set) -> Set
 X * Y = X >< \ _ -> Y
 
 infixr 41 _><_
 infixr 40 _*_
 
+-- peano naturals
 data Nat : Set where
   zero : Nat
   suc : Nat -> Nat
 
 {-# BUILTIN NATURAL Nat #-}
+
 data _+_ (X Y : Set) : Set where
   inl : X -> X + Y
   inr : Y -> X + Y
 
 infixr 30 _+_
 
+-- add a bottom element to any type
 data Maybe (X : Set) : Set where
   no : Maybe X
   yes : X -> Maybe X
 
+-- LEQ ordering on the natural numbers
+-- but also holding additional information on "how"
+-- one number is less than another
+-- so called "thinnings" - ways to embed one vector thing into another
 data _<N=_ : Nat -> Nat -> Set where
   oz : 0 <N= 0
   os : {n m : Nat} -> n <N= m -> suc n <N= suc m
@@ -85,6 +105,11 @@ or {suc n} = os or
 <N=-suc-refl-impossible : {n : Nat} -> suc n <N= n -> Zero
 <N=-suc-refl-impossible n<N=sucn = <N=-suc-swap-impossible or n<N=sucn
 
+-- things that are partial orders
+-- technically we should probably require that the _<=_
+-- operation return types with only one inhabitant
+-- but it's not an issue for now (?)
+-- we are probably going to need totality at some point though
 record PartialOrd : Set1 where
   field
     Obj : Set
@@ -110,18 +135,24 @@ Nats<N=PartialOrd =
     help-antisym (o' n<N=m) (os m<N=n) = naughte (<N=-suc-swap-impossible m<N=n n<N=m)
     help-antisym (o' n<N=m) (o' m<N=n) = naughte (<N=-suc-refl-impossible (<N=-trans (o' n<N=m) m<N=n))
 
+-- functions returning a Maybe are partial
 _-o>_ : Set -> Set -> Set
 X -o> Y = X -> Maybe Y
 
+-- the induced ordering from Maybe
+-- everything is only LTE to itself,
+-- except for 'no' which is LTE to everything else
 _<M=_ : {X : Set} -> Maybe X -> Maybe X -> Set
 no <M= y = One
 yes x <M= no = Zero
 yes x <M= yes y = x == y
 
+-- this is reflexive
 <M=-refl : {X : Set} {x : Maybe X} -> x <M= x
 <M=-refl {X} {no} = <>
 <M=-refl {X} {yes x} = refl
 
+-- and transitive
 <M=-trans : {X : Set} {f g h : X -o> X} (x : X)
          -> (f x <M= g x) -> (g x <M= h x)
          -> f x <M= h x
@@ -131,27 +162,31 @@ yes x <M= yes y = x == y
 <M=-trans {X} {f} {g} {h} n f<=g g<=h | yes x | yes y with h n
 <M=-trans {X} {f} {g} {h} n f<=g g<=h | yes x | yes y | yes z = ==-trans f<=g g<=h
 
+-- and antisymmetric
 <M=-antisym : {X : Set} {x y : Maybe X} -> x <M= y -> y <M= x -> x == y
 <M=-antisym {X} {no} {no} p q = refl
 <M=-antisym {X} {yes x} {yes .x} refl refl = refl
 
+-- and so partial functions X -o> X are a partial ordering for any type X
+-- using the induced ordering from -> and Maybe combined
+-- the ordering induced by X -> Y is simply transferring x's over to Y and comparing them there
 module EndoPartial (X : Set) where
   open PartialOrd
 
   _<o=_ : (f g : X -o> X) -> Set
-  f <o= g = (n : X) -> f n <M= g n
+  f <o= g = (x : X) -> f x <M= g x
 
   EndoPartial : PartialOrd
   EndoPartial = record
     { Obj = X -o> X
     ; _<=_ = _<o=_
     ; <=-refl = \ n -> <M=-refl
-    ; <=-trans = \ {f} {g} {h} f<=g g<=h n -> <M=-trans {X} {f} {g} {h} n (f<=g n) (g<=h n)
-    ; <=-antisym = \ f<=g g<=h -> ext \ n -> <M=-antisym (f<=g n) (g<=h n)
+    ; <=-trans = \ {f} {g} {h} f<=g g<=h x -> <M=-trans {X} {f} {g} {h} x (f<=g x) (g<=h x)
+    ; <=-antisym = \ f<=g g<=h -> ext \ x -> <M=-antisym (f<=g x) (g<=h x)
     }
 
--- ?
-
+-- these should be functors
+-- for now they are nothing
 module MonotoneThing where
   open PartialOrd
 
@@ -163,13 +198,22 @@ module MonotoneThing where
     field
       preserves : {x x' : Obj D} -> _<=_ D x x' -> _<=_ E (F x) (F x')
 
+-- a sequence is a mapping from natural numbers to a thing
 Sequence : (X : Set) -> Set
 Sequence X = (n : Nat) -> X
 
+-- for P to be true it just needs to be true at every index
+AllSeq : {X : Set} (P : X -> Set) -> Sequence X -> Set
+AllSeq P seq = (n : Nat) -> P (seq n)
+
+-- a chain is an increasing sequence
 Chain : PartialOrd -> Set
 Chain ord = Sequence Obj >< \ f -> (n : Nat) -> f n <= f (suc n)
   where open PartialOrd ord
 
+-- least upper bound
+-- some thing that is bigger than an entire chain
+-- and is also smaller than all other things that are bigger than the entire chain
 U_==_ : {ord : PartialOrd} -> Chain ord -> PartialOrd.Obj ord -> Set
 U_==_ {ord} (seq , increasing) x
   = AllSeq (\ y -> y <= x) seq

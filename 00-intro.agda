@@ -44,8 +44,8 @@ record _><_ (X : Set) (P : X -> Set) : Set where
 _*_ : (X Y : Set) -> Set
 X * Y = X >< \ _ -> Y
 
-infixr 31 _><_
-infixr 30 _*_
+infixr 41 _><_
+infixr 40 _*_
 
 data Nat : Set where
   zero : Nat

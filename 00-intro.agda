@@ -85,16 +85,20 @@ or {suc n} = os or
 <N=-suc-refl-impossible : {n : Nat} -> suc n <N= n -> Zero
 <N=-suc-refl-impossible n<N=sucn = <N=-suc-swap-impossible or n<N=sucn
 
-record PartialOrd (X : Set) (_<=_ : X -> X -> Set) : Set where
+record PartialOrd : Set1 where
   field
-    <=-refl : {x : X} -> x <= x
-    <=-trans : {x y z : X} -> x <= y -> y <= z -> x <= z
-    <=-antisym : {x y : X} -> x <= y -> y <= x -> x == y
+    Obj : Set
+    _<=_ : Obj -> Obj -> Set
+    <=-refl : {x : Obj} -> x <= x
+    <=-trans : {x y z : Obj} -> x <= y -> y <= z -> x <= z
+    <=-antisym : {x y : Obj} -> x <= y -> y <= x -> x == y
 
-Nats<N=PartialOrd : PartialOrd Nat _<N=_
+Nats<N=PartialOrd : PartialOrd
 Nats<N=PartialOrd =
   record
-    { <=-refl = or
+    { Obj = Nat
+    ; _<=_ = _<N=_
+    ; <=-refl = or
     ; <=-trans = <N=-trans
     ; <=-antisym = help-antisym
     }
@@ -137,24 +141,27 @@ module EndoPartial (X : Set) where
   _<o=_ : (f g : X -o> X) -> Set
   f <o= g = (n : X) -> f n <M= g n
 
-  EndoPartial : PartialOrd (X -o> X) _<o=_
+  EndoPartial : PartialOrd
   EndoPartial = record
-    { <=-refl = \ n -> <M=-refl
+    { Obj = X -o> X
+    ; _<=_ = _<o=_
+    ; <=-refl = \ n -> <M=-refl
     ; <=-trans = \ {f} {g} {h} f<=g g<=h n -> <M=-trans {X} {f} {g} {h} n (f<=g n) (g<=h n)
     ; <=-antisym = \ f<=g g<=h -> ext \ n -> <M=-antisym (f<=g n) (g<=h n)
     }
 
-
-
 -- ?
-record MonotoneThing {X Y : Set}
-                     {_<X=_ : X -> X -> Set}
-                     {_<Y=_ : Y -> Y -> Set}
-                     {D : PartialOrd X _<X=_}
-                     {E : PartialOrd Y _<Y=_}
-                     (F : X -> Y) : Set where
-  field
-    preserves : {x x' : X} -> x <X= x' -> F x <Y= F x'
+
+module MonotoneThing where
+  open PartialOrd
+
+  record MonotoneThing
+    {D : PartialOrd}
+    {E : PartialOrd}
+    (F : Obj D -> Obj E) : Set
+    where
+    field
+      preserves : {x x' : Obj D} -> _<=_ D x x' -> _<=_ E (F x) (F x')
 
 -- chains?
 

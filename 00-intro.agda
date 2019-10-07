@@ -214,8 +214,8 @@ Chain ord = Sequence Obj >< \ f -> (n : Nat) -> f n <= f (suc n)
 -- least upper bound
 -- some thing that is bigger than an entire chain
 -- and is also smaller than all other things that are bigger than the entire chain
-U_==_ : {ord : PartialOrd} -> Chain ord -> PartialOrd.Obj ord -> Set
-U_==_ {ord} (seq , increasing) x
+for_U_==_ : (ord : PartialOrd) -> Chain ord -> PartialOrd.Obj ord -> Set
+for ord U (seq , increasing) == x
   = AllSeq (\ y -> y <= x) seq
   * ((other : Obj) -> AllSeq (\ y -> y <= other) seq -> x <= other)
   where
@@ -223,10 +223,41 @@ U_==_ {ord} (seq , increasing) x
   open _><_
 
 
--- scott domain
--- all chains have a LUB
--- least element (bottom)
+-- a Scott domain is a partial ordering in which all chains have a LUB
+-- and there exists a "least" element
+module SCOTTDOMAIN where
+  open PartialOrd
 
--- (F -> Maybe F) form a Scott domain
+  record ScottDomain : Set1 where
+    field
+      ord : PartialOrd
+      bot : Obj ord
+      lub : Chain ord -> Obj ord
+      bot-smallest : (x : Obj ord) -> _<=_ ord bot x
+      lub-is-LUB : (chain : Chain ord) -> for ord U chain == lub chain
+
+open SCOTTDOMAIN
+
+-- partial endofunctions form a scott domain
+-- the bot element is the nowhere defined function
+-- and the LUB of a sequence of functions would be their set union
+module EndoScott (X : Set) where
+  open EndoPartial X
+
+  -- :( don't know how you deal with this
+  -- it's genuinely non-constructive
+  -- you can't know if you will ever reach a point where your f is defined
+  postulate
+    lub-for-functions : Chain EndoPartial -> X -o> X
+    lub-for-functions-is-lub : (chain : Chain EndoPartial) -> for EndoPartial U chain == lub-for-functions chain
+
+  EndoScott : ScottDomain
+  EndoScott = record
+    { ord = EndoPartial
+    ; bot = \ x -> no
+    ; lub = lub-for-functions
+    ; bot-smallest = \ f x -> <>
+    ; lub-is-LUB = lub-for-functions-is-lub
+    }
 
 -- pointwise products are scott domains

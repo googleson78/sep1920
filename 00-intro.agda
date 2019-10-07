@@ -38,8 +38,8 @@ postulate
 record _><_ (X : Set) (P : X -> Set) : Set where
   constructor _,_
   field
-    x : X
-    px : P x
+    fst : X
+    snd : P fst
 
 _*_ : (X Y : Set) -> Set
 X * Y = X >< \ _ -> Y

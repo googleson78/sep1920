@@ -106,6 +106,44 @@ Nats<N=PartialOrd =
     help-antisym (o' n<N=m) (os m<N=n) = naughte (<N=-suc-swap-impossible m<N=n n<N=m)
     help-antisym (o' n<N=m) (o' m<N=n) = naughte (<N=-suc-refl-impossible (<N=-trans (o' n<N=m) m<N=n))
 
+_-o>_ : Set -> Set -> Set
+X -o> Y = X -> Maybe Y
+
+_<M=_ : {X : Set} -> Maybe X -> Maybe X -> Set
+no <M= y = One
+yes x <M= no = Zero
+yes x <M= yes y = x == y
+
+<M=-refl : {X : Set} {x : Maybe X} -> x <M= x
+<M=-refl {X} {no} = <>
+<M=-refl {X} {yes x} = refl
+
+<M=-trans : {X : Set} {f g h : X -o> X} (x : X)
+         -> (f x <M= g x) -> (g x <M= h x)
+         -> f x <M= h x
+<M=-trans {X} {f} {g} {h} n f<=g g<=h with f n
+<M=-trans {X} {f} {g} {h} n f<=g g<=h | no = <>
+<M=-trans {X} {f} {g} {h} n f<=g g<=h | yes x with g n
+<M=-trans {X} {f} {g} {h} n f<=g g<=h | yes x | yes y with h n
+<M=-trans {X} {f} {g} {h} n f<=g g<=h | yes x | yes y | yes z = ==-trans f<=g g<=h
+
+<M=-antisym : {X : Set} {x y : Maybe X} -> x <M= y -> y <M= x -> x == y
+<M=-antisym {X} {no} {no} p q = refl
+<M=-antisym {X} {yes x} {yes .x} refl refl = refl
+
+module EndoPartial (X : Set) where
+  open PartialOrd
+
+  _<o=_ : (f g : X -o> X) -> Set
+  f <o= g = (n : X) -> f n <M= g n
+
+  EndoPartial : PartialOrd (X -o> X) _<o=_
+  EndoPartial = record
+    { <=-refl = \ n -> <M=-refl
+    ; <=-trans = \ {f} {g} {h} f<=g g<=h n -> <M=-trans {X} {f} {g} {h} n (f<=g n) (g<=h n)
+    ; <=-antisym = \ f<=g g<=h -> ext \ n -> <M=-antisym (f<=g n) (g<=h n)
+    }
+
 
 
 -- ?

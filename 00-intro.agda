@@ -261,3 +261,23 @@ module EndoScott (X : Set) where
     }
 
 -- pointwise products are scott domains
+
+*-elemwise
+  :  {X Y : Set} {u v : X * Y}
+  -> _><_.fst u == _><_.fst v
+  -> _><_.snd u == _><_.snd v
+  -> u == v
+*-elemwise refl refl = refl
+
+PointwiseOrd : PartialOrd -> PartialOrd -> PartialOrd
+PointwiseOrd X Y = record
+  { Obj = Obj X * Obj Y
+  ; _<=_ = \{ (x1 , y1) (x2 , y2) -> (x1 <X= x2) * (y1 <Y= y2) }
+  ; <=-refl = <=-refl X ,  <=-refl Y
+  ; <=-trans = \{ (fstx<=fsty , sndx<=sndy) (fsty<=fstz , sndy<=sndz) -> <=-trans X fstx<=fsty fsty<=fstz , <=-trans Y sndx<=sndy sndy<=sndz}
+  ; <=-antisym = \{ (fstx<=fsty , sndx<=sndy) (fsty<=fstx , sndy<=sndx) -> *-elemwise (<=-antisym X fstx<=fsty fsty<=fstx) (<=-antisym Y sndx<=sndy sndy<=sndx)}
+  }
+  where
+  open PartialOrd
+  open PartialOrd X using () renaming (_<=_ to _<X=_)
+  open PartialOrd Y using () renaming (_<=_ to _<Y=_)

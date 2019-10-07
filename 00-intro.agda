@@ -170,7 +170,14 @@ Chain : PartialOrd -> Set
 Chain ord = Sequence Obj >< \ f -> (n : Nat) -> f n <= f (suc n)
   where open PartialOrd ord
 
--- least upper bounds
+U_==_ : {ord : PartialOrd} -> Chain ord -> PartialOrd.Obj ord -> Set
+U_==_ {ord} (seq , increasing) x
+  = AllSeq (\ y -> y <= x) seq
+  * ((other : Obj) -> AllSeq (\ y -> y <= other) seq -> x <= other)
+  where
+  open PartialOrd ord
+  open _><_
+
 
 -- scott domain
 -- all chains have a LUB

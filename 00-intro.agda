@@ -2,12 +2,7 @@
 
 module 00-intro where
 
--- empty type - impossible to construct - contradiction
-data Zero : Set where
-
--- eliminator for the empty type (zero - naught - naughtElim - naughte)
-naughte : {X : Set} -> Zero -> X
-naughte ()
+open import Lib.Zero
 
 -- the type with only one element - trivial to construct - truth
 record One : Set where

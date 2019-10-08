@@ -19,15 +19,22 @@ AllSeq : {X : Set} (P : X -> Set) -> Sequence X -> Set
 AllSeq P seq = (n : Nat) -> P (seq n)
 
 -- a chain is an increasing sequence
-Chain : PartialOrder -> Set
-Chain ord = Sequence Obj >< \ f -> (n : Nat) -> f n <= f (suc n)
-  where open PartialOrder ord
+module Chain (ord : PartialOrder) where
+  open PartialOrder ord
+
+  record Chain : Set where
+    constructor _o><o_
+    field
+      seq : Sequence Obj
+      increasing : (n : Nat) -> seq n <= seq (suc n)
+
+open Chain
 
 -- least upper bound
 -- some thing that is bigger than an entire chain
 -- and is also smaller than all other things that are bigger than the entire chain
-for_U_==_ : (ord : PartialOrder) -> Chain ord -> PartialOrder.Obj ord -> Set
-for ord U (seq , increasing) == x
+U_==_ : {ord : PartialOrder} -> Chain ord -> PartialOrder.Obj ord -> Set
+U_==_ {ord} (seq o><o increasing) x
   = AllSeq (\ y -> y <= x) seq
   * ((other : Obj) -> AllSeq (\ y -> y <= other) seq -> x <= other)
   where
@@ -44,7 +51,7 @@ module SCOTTDOMAIN where
       bot : Obj ord
       lub : Chain ord -> Obj ord
       bot-smallest : (x : Obj ord) -> _<=_ ord bot x
-      lub-is-LUB : (chain : Chain ord) -> for ord U chain == lub chain
+      lub-is-LUB : (chain : Chain ord) -> U chain == lub chain
 
 open SCOTTDOMAIN
 
@@ -59,7 +66,7 @@ module EndoScott (X : Set) where
   -- you can't know if you will ever reach a point where your f is defined
   postulate
     lub-for-functions : Chain EndoPartial -> X -o> X
-    lub-for-functions-is-lub : (chain : Chain EndoPartial) -> for EndoPartial U chain == lub-for-functions chain
+    lub-for-functions-is-lub : (chain : Chain EndoPartial) -> U chain == lub-for-functions chain
 
   EndoScott : ScottDomain
   EndoScott = record

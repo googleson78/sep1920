@@ -30,13 +30,18 @@ module Chain (ord : PartialOrder) where
 
 open Chain
 
+_isBoundedBy_ : {ord : PartialOrder} -> Chain ord -> PartialOrder.Obj ord -> Set
+_isBoundedBy_ {ord} (seq o><o _) x = AllSeq (\y -> y <= x) seq
+  where
+  open PartialOrder ord
+
 -- least upper bound
 -- some thing that is bigger than an entire chain
 -- and is also smaller than all other things that are bigger than the entire chain
 U_==_ : {ord : PartialOrder} -> Chain ord -> PartialOrder.Obj ord -> Set
-U_==_ {ord} (seq o><o increasing) x
-  = AllSeq (\ y -> y <= x) seq
-  * ((other : Obj) -> AllSeq (\ y -> y <= other) seq -> x <= other)
+U_==_ {ord} chain lub
+  = (chain isBoundedBy lub)
+  * ((other : Obj) -> chain isBoundedBy other -> lub <= other)
   where
   open PartialOrder ord
 

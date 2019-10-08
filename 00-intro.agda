@@ -32,8 +32,6 @@ for ord U (seq , increasing) == x
   * ((other : Obj) -> AllSeq (\ y -> y <= other) seq -> x <= other)
   where
   open PartialOrder ord
-  open _><_
-
 
 -- a Scott domain is a partial ordering in which all chains have a LUB
 -- and there exists a "least" element

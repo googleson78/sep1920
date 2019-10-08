@@ -74,13 +74,6 @@ module EndoScott (X : Set) where
 
 -- pointwise products are scott domains
 
-*-elemwise
-  :  {X Y : Set} {u v : X * Y}
-  -> _><_.fst u == _><_.fst v
-  -> _><_.snd u == _><_.snd v
-  -> u == v
-*-elemwise refl refl = refl
-
 PointwiseOrd : PartialOrder -> PartialOrder -> PartialOrder
 PointwiseOrd X Y = record
   { Obj = Obj X * Obj Y

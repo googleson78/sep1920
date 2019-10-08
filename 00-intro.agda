@@ -3,10 +3,7 @@
 module 00-intro where
 
 open import Lib.Zero
-
--- the type with only one element - trivial to construct - truth
-record One : Set where
-  constructor <>
+open import Lib.One
 
 -- a thing is equal to another thing only if they are exactly one and the same
 data _==_ {X : Set} (x : X) : X -> Set where

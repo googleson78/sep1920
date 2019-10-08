@@ -12,7 +12,7 @@ open import Lib.PartialOrder
 
 -- a sequence is a mapping from natural numbers to a thing
 Sequence : (X : Set) -> Set
-Sequence X = (n : Nat) -> X
+Sequence X = Nat -> X
 
 -- for P to be true it just needs to be true at every index
 AllSeq : {X : Set} (P : X -> Set) -> Sequence X -> Set

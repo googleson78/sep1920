@@ -14,7 +14,7 @@ open import Lib.Maybe
 -- operation return types with only one inhabitant
 -- but it's not an issue for now (?)
 -- we are probably going to need totality at some point though
-record PartialOrd : Set1 where
+record PartialOrder : Set1 where
   field
     Obj : Set
     _<=_ : Obj -> Obj -> Set
@@ -22,8 +22,8 @@ record PartialOrd : Set1 where
     <=-trans : {x y z : Obj} -> x <= y -> y <= z -> x <= z
     <=-antisym : {x y : Obj} -> x <= y -> y <= x -> x == y
 
-Nats<N=PartialOrd : PartialOrd
-Nats<N=PartialOrd =
+Nats<N=PartialOrder : PartialOrder
+Nats<N=PartialOrder =
   record
     { Obj = Nat
     ; _<=_ = _<N=_
@@ -36,12 +36,12 @@ Nats<N=PartialOrd =
 -- using the induced ordering from -> and Maybe combined
 -- the ordering induced by X -> Y is simply transferring x's over to Y and comparing them there
 module EndoPartial (X : Set) where
-  open PartialOrd
+  open PartialOrder
 
   _<o=_ : (f g : X -o> X) -> Set
   f <o= g = (x : X) -> f x <M= g x
 
-  EndoPartial : PartialOrd
+  EndoPartial : PartialOrder
   EndoPartial = record
     { Obj = X -o> X
     ; _<=_ = _<o=_
@@ -53,11 +53,11 @@ module EndoPartial (X : Set) where
 -- these should be functors
 -- for now they are nothing
 module MonotoneThing where
-  open PartialOrd
+  open PartialOrder
 
   record MonotoneThing
-    {D : PartialOrd}
-    {E : PartialOrd}
+    {D : PartialOrder}
+    {E : PartialOrder}
     (F : Obj D -> Obj E) : Set
     where
     field
@@ -72,30 +72,30 @@ AllSeq : {X : Set} (P : X -> Set) -> Sequence X -> Set
 AllSeq P seq = (n : Nat) -> P (seq n)
 
 -- a chain is an increasing sequence
-Chain : PartialOrd -> Set
+Chain : PartialOrder -> Set
 Chain ord = Sequence Obj >< \ f -> (n : Nat) -> f n <= f (suc n)
-  where open PartialOrd ord
+  where open PartialOrder ord
 
 -- least upper bound
 -- some thing that is bigger than an entire chain
 -- and is also smaller than all other things that are bigger than the entire chain
-for_U_==_ : (ord : PartialOrd) -> Chain ord -> PartialOrd.Obj ord -> Set
+for_U_==_ : (ord : PartialOrder) -> Chain ord -> PartialOrder.Obj ord -> Set
 for ord U (seq , increasing) == x
   = AllSeq (\ y -> y <= x) seq
   * ((other : Obj) -> AllSeq (\ y -> y <= other) seq -> x <= other)
   where
-  open PartialOrd ord
+  open PartialOrder ord
   open _><_
 
 
 -- a Scott domain is a partial ordering in which all chains have a LUB
 -- and there exists a "least" element
 module SCOTTDOMAIN where
-  open PartialOrd
+  open PartialOrder
 
   record ScottDomain : Set1 where
     field
-      ord : PartialOrd
+      ord : PartialOrder
       bot : Obj ord
       lub : Chain ord -> Obj ord
       bot-smallest : (x : Obj ord) -> _<=_ ord bot x
@@ -134,7 +134,7 @@ module EndoScott (X : Set) where
   -> u == v
 *-elemwise refl refl = refl
 
-PointwiseOrd : PartialOrd -> PartialOrd -> PartialOrd
+PointwiseOrd : PartialOrder -> PartialOrder -> PartialOrder
 PointwiseOrd X Y = record
   { Obj = Obj X * Obj Y
   ; _<=_ = \{ (x1 , y1) (x2 , y2) -> (x1 <X= x2) * (y1 <Y= y2) }
@@ -143,6 +143,6 @@ PointwiseOrd X Y = record
   ; <=-antisym = \{ (fstx<=fsty , sndx<=sndy) (fsty<=fstx , sndy<=sndx) -> *-elemwise (<=-antisym X fstx<=fsty fsty<=fstx) (<=-antisym Y sndx<=sndy sndy<=sndx)}
   }
   where
-  open PartialOrd
-  open PartialOrd X using () renaming (_<=_ to _<X=_)
-  open PartialOrd Y using () renaming (_<=_ to _<Y=_)
+  open PartialOrder
+  open PartialOrder X using () renaming (_<=_ to _<X=_)
+  open PartialOrder Y using () renaming (_<=_ to _<Y=_)

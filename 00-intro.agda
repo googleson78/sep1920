@@ -19,6 +19,9 @@ AllSeq : {X : Set} (P : X -> Set) -> Sequence X -> Set
 AllSeq P seq = (n : Nat) -> P (seq n)
 
 -- a chain is an increasing sequence
+-- TODO: how about do a global \n -> instead
+-- it's very annoying to work with right now
+-- because I have two functions and two n's to handle
 module Chain (ord : PartialOrder) where
   open PartialOrder ord
 
@@ -82,8 +85,8 @@ module EndoScott (X : Set) where
     ; lub-is-LUB = lub-for-functions-is-lub
     }
 
-PointwiseOrd : PartialOrder -> PartialOrder -> PartialOrder
-PointwiseOrd X Y = record
+PointwiseOrder : PartialOrder -> PartialOrder -> PartialOrder
+PointwiseOrder X Y = record
   { Obj = Obj X * Obj Y
   ; _<=_ = \{ (x1 , y1) (x2 , y2) -> (x1 <X= x2) * (y1 <Y= y2) }
   ; <=-refl = <=-refl X ,  <=-refl Y
@@ -94,5 +97,36 @@ PointwiseOrd X Y = record
   open PartialOrder
   open PartialOrder X using () renaming (_<=_ to _<X=_)
   open PartialOrder Y using () renaming (_<=_ to _<Y=_)
+
+PointwiseScott : ScottDomain -> ScottDomain -> ScottDomain
+PointwiseScott
+  X@record
+    { ord = ordX
+    ; bot = botX
+    ; lub = lubX
+    ; bot-smallest = bot-smallestX
+    ; lub-is-LUB = lub-is-LUBX
+    }
+  Y@record
+    { ord = ordY
+    ; bot = botY
+    ; lub = lubY
+    ; bot-smallest = bot-smallestY
+    ; lub-is-LUB = lub-is-LUBY
+    }
+  = record
+      { ord = PointwiseOrder ordX ordY
+      ; bot = botX , botY
+      ; lub = \{ (seq o><o increasing) ->
+            lubX ((\ n -> fst (seq n)) o><o \ n -> fst (increasing n))
+          , lubY ((\ n -> snd (seq n)) o><o \ n -> snd (increasing n))}
+      ; bot-smallest = \{ (x , y) -> (bot-smallestX x) , (bot-smallestY y)}
+      ; lub-is-LUB = {!!}
+      }
+  where
+
+  open _><_
+  open PartialOrder ordX using () renaming (_<=_ to _<X=_)
+  open PartialOrder ordY using () renaming (_<=_ to _<Y=_)
 
 -- TODO: pointwise products are scott domains

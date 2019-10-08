@@ -1,3 +1,5 @@
+{-# OPTIONS --no-unicode #-}
+
 module 01-intro-cont where
 
 -- unresolved metas

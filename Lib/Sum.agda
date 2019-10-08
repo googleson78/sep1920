@@ -1,3 +1,5 @@
+{-# OPTIONS --no-unicode #-}
+
 module Sum where
 
 data _+_ (X Y : Set) : Set where

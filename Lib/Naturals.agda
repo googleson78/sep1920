@@ -1,3 +1,5 @@
+{-# OPTIONS --no-unicode #-}
+
 module Lib.Naturals where
 
 open import Lib.Zero

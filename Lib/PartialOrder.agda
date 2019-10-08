@@ -1,3 +1,5 @@
+{-# OPTIONS --no-unicode #-}
+
 module Lib.PartialOrder where
 
 open import Lib.Equality

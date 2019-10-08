@@ -1,3 +1,5 @@
+{-# OPTIONS --no-unicode #-}
+
 module Lib.One where
 
 -- the type with only one element - trivial to construct - truth

@@ -1,3 +1,5 @@
+{-# OPTIONS --no-unicode #-}
+
 module Lib.Zero where
 
 -- empty type - impossible to construct - contradiction

@@ -1,3 +1,5 @@
+{-# OPTIONS --no-unicode #-}
+
 module Lib.Equality where
 
 -- a thing is equal to another thing only if they are exactly one and the same

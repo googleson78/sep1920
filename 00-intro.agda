@@ -6,13 +6,7 @@ open import Lib.Zero
 open import Lib.One
 open import Lib.Equality
 open import Lib.Sigma
-
--- peano naturals
-data Nat : Set where
-  zero : Nat
-  suc : Nat -> Nat
-
-{-# BUILTIN NATURAL Nat #-}
+open import Lib.Naturals
 
 data _+_ (X Y : Set) : Set where
   inl : X -> X + Y
@@ -24,33 +18,6 @@ infixr 30 _+_
 data Maybe (X : Set) : Set where
   no : Maybe X
   yes : X -> Maybe X
-
--- LEQ ordering on the natural numbers
--- but also holding additional information on "how"
--- one number is less than another
--- so called "thinnings" - ways to embed one vector thing into another
-data _<N=_ : Nat -> Nat -> Set where
-  oz : 0 <N= 0
-  os : {n m : Nat} -> n <N= m -> suc n <N= suc m
-  o' : {n m : Nat} -> n <N= m -> n <N= suc m
-
-or : {n : Nat} -> n <N= n
-or {zero} = oz
-or {suc n} = os or
-
-<N=-trans : {n m k : Nat} -> n <N= m -> m <N= k -> n <N= k
-<N=-trans oz m<N=k = m<N=k
-<N=-trans (os n<N=m) (os m<N=k) = os (<N=-trans n<N=m m<N=k)
-<N=-trans (os n<N=m) (o' m<N=k) = os (<N=-trans (o' n<N=m) m<N=k)
-<N=-trans (o' n<N=m) (os m<N=k) = o' (<N=-trans n<N=m m<N=k)
-<N=-trans (o' n<N=m) (o' m<N=k) = o' (<N=-trans (o' n<N=m) m<N=k)
-
-<N=-suc-swap-impossible : {n m : Nat} -> n <N= m -> suc m <N= n -> Zero
-<N=-suc-swap-impossible th0 (os th1) = <N=-suc-swap-impossible th1 th0
-<N=-suc-swap-impossible th0 (o' th1) = <N=-suc-swap-impossible (<N=-trans (o' or) th0) th1
-
-<N=-suc-refl-impossible : {n : Nat} -> suc n <N= n -> Zero
-<N=-suc-refl-impossible n<N=sucn = <N=-suc-swap-impossible or n<N=sucn
 
 -- things that are partial orders
 -- technically we should probably require that the _<=_
@@ -72,15 +39,8 @@ Nats<N=PartialOrd =
     ; _<=_ = _<N=_
     ; <=-refl = or
     ; <=-trans = <N=-trans
-    ; <=-antisym = help-antisym
+    ; <=-antisym = <N=-antisym
     }
-    where
-    help-antisym : {n m : Nat} -> n <N= m -> m <N= n -> n == m
-    help-antisym oz oz = refl
-    help-antisym (os n<N=m) (os m<N=n) = suc $= help-antisym n<N=m m<N=n
-    help-antisym (os n<N=m) (o' m<N=n) = naughte (<N=-suc-swap-impossible n<N=m m<N=n)
-    help-antisym (o' n<N=m) (os m<N=n) = naughte (<N=-suc-swap-impossible m<N=n n<N=m)
-    help-antisym (o' n<N=m) (o' m<N=n) = naughte (<N=-suc-refl-impossible (<N=-trans (o' n<N=m) m<N=n))
 
 -- functions returning a Maybe are partial
 _-o>_ : Set -> Set -> Set

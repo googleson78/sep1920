@@ -72,8 +72,6 @@ module EndoScott (X : Set) where
     ; lub-is-LUB = lub-for-functions-is-lub
     }
 
--- pointwise products are scott domains
-
 PointwiseOrd : PartialOrder -> PartialOrder -> PartialOrder
 PointwiseOrd X Y = record
   { Obj = Obj X * Obj Y
@@ -86,3 +84,5 @@ PointwiseOrd X Y = record
   open PartialOrder
   open PartialOrder X using () renaming (_<=_ to _<X=_)
   open PartialOrder Y using () renaming (_<=_ to _<Y=_)
+
+-- TODO: pointwise products are scott domains

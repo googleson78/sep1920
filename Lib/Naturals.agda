@@ -2,6 +2,7 @@ module Lib.Naturals where
 
 open import Lib.Zero
 open import Lib.Equality
+open import Lib.PartialOrder
 
 -- peano naturals
 data Nat : Set where
@@ -44,3 +45,13 @@ or {suc n} = os or
 <N=-antisym (os n<N=m) (o' m<N=n) = naughte (<N=-suc-swap-impossible n<N=m m<N=n)
 <N=-antisym (o' n<N=m) (os m<N=n) = naughte (<N=-suc-swap-impossible m<N=n n<N=m)
 <N=-antisym (o' n<N=m) (o' m<N=n) = naughte (<N=-suc-refl-impossible (<N=-trans (o' n<N=m) m<N=n))
+
+Nats<N=PartialOrder : PartialOrder
+Nats<N=PartialOrder =
+  record
+    { Obj = Nat
+    ; _<=_ = _<N=_
+    ; <=-refl = or
+    ; <=-trans = <N=-trans
+    ; <=-antisym = <N=-antisym
+    }

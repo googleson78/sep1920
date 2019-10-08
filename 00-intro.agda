@@ -9,12 +9,6 @@ open import Lib.Sigma
 open import Lib.Naturals
 open import Lib.Maybe
 
-data _+_ (X Y : Set) : Set where
-  inl : X -> X + Y
-  inr : Y -> X + Y
-
-infixr 30 _+_
-
 -- things that are partial orders
 -- technically we should probably require that the _<=_
 -- operation return types with only one inhabitant

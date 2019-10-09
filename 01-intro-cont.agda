@@ -2,10 +2,12 @@
 
 module 01-intro-cont where
 
--- unresolved metas
---open import 00-intro
+open import Lib.Maybe
+
+open import 00-intro
 
 -- Maybe induced order
+-- this is actually already done in Lib.Maybe
 
 -- maybe induced order is scott domain
 

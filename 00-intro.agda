@@ -85,6 +85,10 @@ module EndoScott (X : Set) where
     ; lub-is-LUB = lub-for-functions-is-lub
     }
 
+-- if we have two orders we can lift them to an order on pairs
+-- in fact we can do so in multiple ways
+-- here we will use the pointwise order -
+-- (x1, y1) <= (x2, y2) iff x1 < x2 && y1 < y2
 PointwiseOrder : PartialOrder -> PartialOrder -> PartialOrder
 PointwiseOrder X Y = record
   { Obj = Obj X * Obj Y
@@ -98,6 +102,7 @@ PointwiseOrder X Y = record
   open PartialOrder X using () renaming (_<=_ to _<X=_)
   open PartialOrder Y using () renaming (_<=_ to _<Y=_)
 
+-- using the pointwise order we can also naturally lift scott domains
 PointwiseScott : ScottDomain -> ScottDomain -> ScottDomain
 PointwiseScott
   X@record

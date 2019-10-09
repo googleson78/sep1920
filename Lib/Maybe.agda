@@ -83,15 +83,3 @@ module EndoPartial (X : Set) where
     -><M=-trans {X} {f} {g} {h} n f<=g g<=h | yes x | yes y with h n
     -><M=-trans {X} {f} {g} {h} n f<=g g<=h | yes x | yes y | yes z = ==-trans f<=g g<=h
 
--- these should be functors
--- for now they are nothing
-module MonotoneThing where
-  open PartialOrder
-
-  record MonotoneThing
-    {D : PartialOrder}
-    {E : PartialOrder}
-    (F : Obj D -> Obj E) : Set
-    where
-    field
-      preserves : {x x' : Obj D} -> _<=_ D x x' -> _<=_ E (F x) (F x')

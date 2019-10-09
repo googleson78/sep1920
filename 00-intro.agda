@@ -114,19 +114,33 @@ PointwiseScott
     ; bot-smallest = bot-smallestY
     ; lub-is-LUB = lub-is-LUBY
     }
-  = record
-      { ord = PointwiseOrder ordX ordY
-      ; bot = botX , botY
-      ; lub = \{ (seq o><o increasing) ->
-            lubX ((\ n -> fst (seq n)) o><o \ n -> fst (increasing n))
-          , lubY ((\ n -> snd (seq n)) o><o \ n -> snd (increasing n))}
-      ; bot-smallest = \{ (x , y) -> (bot-smallestX x) , (bot-smallestY y)}
-      ; lub-is-LUB = {!!}
-      }
+  = help
   where
 
   open _><_
+  open ScottDomain
+  open PartialOrder
+  open Chain.Chain
   open PartialOrder ordX using () renaming (_<=_ to _<X=_)
   open PartialOrder ordY using () renaming (_<=_ to _<Y=_)
 
--- TODO: pointwise products are scott domains
+  chainOnFst : {X Y : PartialOrder} -> Chain (PointwiseOrder X Y) -> Chain X
+  chainOnFst (seq o><o increasing) = (\ n -> fst (seq n)) o><o \ n -> fst (increasing n)
+
+  chainOnSnd : {X Y : PartialOrder} -> Chain (PointwiseOrder X Y) -> Chain Y
+  chainOnSnd (seq o><o increasing) = (\ n -> snd (seq n)) o><o \ n -> snd (increasing n)
+
+  help : ScottDomain
+  ord help = PointwiseOrder ordX ordY
+  bot help = botX , botY
+  lub help = \chain -> lubX (chainOnFst chain) , lubY (chainOnSnd chain)
+  bot-smallest help = \{ (x , y) -> (bot-smallestX x) , (bot-smallestY y)}
+  lub-is-LUB help chain
+    = (\ n -> fst (lub-is-LUBX chainX) n , fst (lub-is-LUBY chainY) n)
+    , \{ (x , y) other-is-ub ->
+          snd (lub-is-LUBX chainX) x (\ n -> fst (other-is-ub n))
+        , snd (lub-is-LUBY chainY) y (\ n -> snd (other-is-ub n))
+       }
+    where
+    chainX = chainOnFst chain
+    chainY = chainOnSnd chain

@@ -5,7 +5,9 @@ import Data.List (iterate', nub)
 
 -- We need names for our variables.
 -- In class these are secretly indices, which we don't mention at all.
--- Instead we just say x0 x1 x2 ... instead.
+-- Instead we just say x0, x1, x2,.. and we informally use any variable we like,
+-- by taking proper care to pick the right variables, when working with examples.
+--
 -- Here we will refer to a variable directly by its index
 
 type Name = Int
@@ -21,7 +23,7 @@ type Name = Int
 -- * ε is Epsilon - The language with one word in it.
 -- * ai · Xj is Cons - Putting a character in front of a variable.
 --   Note that while the language over there works over an arbitrary alphabet,
---   we will use Haskells Char for simplicity, noting that we can make it polymorphic,
+--   we will use Haskell's Char for simplicity, noting that we can make it polymorphic,
 --   if we so desire.
 -- * τ1 + τ2 is Plus - Either the first language or the second.
 data RegLang

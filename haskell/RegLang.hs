@@ -1,7 +1,7 @@
 import Prelude hiding (iterate)
 -- ^ so we can implement iterate it ourselves as an example
 
-import Data.List (iterate')
+import Data.List (iterate', nub)
 
 -- We need names for our variables.
 -- In class these are secretly indices, which we don't mention at all.
@@ -105,7 +105,12 @@ denotSystem taus =
       interps = map interpret taus
       -- ^ We take all the interpretations of our input RegLangs,
       -- getting a list of functions (their interpretations)
-   in concatMap head
+   in nub
+    -- ^ remove duplicate strings
+    -- this isn't really needed, but it 
+    -- * makes usage prettier
+    -- * it corresponds better to our mathematical implementation, which uses sets
+    $ concatMap head
     -- ^ in the end we take all the first elements of our approximations,
     -- as that's where our "main" language is.
     $ cutOffIfFixed

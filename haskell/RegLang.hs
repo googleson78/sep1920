@@ -60,7 +60,7 @@ interpret (Append c i) langs = map (c:) $ langs !! i
   -- We prepend c to each of the words in our lang
 interpret (Plus l1 l2) langs =
   interpret l1 langs `interleave` interpret l2 langs
-  -- ^ We interpret "Plus" as interleaving of two lists.
+  -- ^ We interpret "Plus" as interleaving of two lists, after we first interpret each RegLang individually.
   -- By interleaving I mean: interleave [1,1,1] [2,2,2] == [1,2,1,2,1,2]
   -- We could just as well use list append, but this is a more "fair" way to implement set union.
 
@@ -107,7 +107,7 @@ denotSystem taus =
       -- getting a list of functions (their interpretations)
    in nub
     -- ^ remove duplicate strings
-    -- this isn't really needed, but it 
+    -- this isn't really needed, but it
     -- * makes usage prettier
     -- * it corresponds better to our mathematical implementation, which uses sets
     $ concatMap head

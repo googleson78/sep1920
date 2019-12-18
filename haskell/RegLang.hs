@@ -29,7 +29,7 @@ type Name = Int
 data RegLang
   = Empty
   | Epsilon
-  | Append Char Name
+  | Cons Char Name
   | Plus RegLang RegLang
 
 -- We will now implement the denotational semantics given in the notes,
@@ -55,10 +55,10 @@ type Language = [String]
 interpret :: RegLang -> [Language] -> Language
 interpret Empty _ = [] -- the empty language has no words
 interpret Epsilon _ = [""] -- epsilon has one word - the empty word
-interpret (Append c i) langs = map (c:) $ langs !! i
+interpret (Cons c i) langs = map (c:) $ langs !! i
   -- ^ Here the i index comes into effect - we need to get xi from our input n-tuple
   -- in other words we need to index our list of langs
-  -- Afterwards we interpret Append as we usually do in maths, but translated to lists:
+  -- Afterwards we interpret Cons as we usually do in maths, but translated to lists:
   -- We prepend c to each of the words in our lang
 interpret (Plus l1 l2) langs =
   interpret l1 langs `interleave` interpret l2 langs
@@ -136,10 +136,10 @@ cutOffIfFixed (x:y:xs) = if x == y then [x] else x : cutOffIfFixed (y:xs)
 --------- Some examples to play with.
 
 -- a
-a = [Append 'a' 1, Epsilon]
+a = [Cons 'a' 1, Epsilon]
 
 -- (ab)*
-abStar = [Plus Epsilon (Append 'a' 1), Append 'b' 0]
+abStar = [Plus Epsilon (Cons 'a' 1), Cons 'b' 0]
 
 -- (a|b)*
-aOrbStar = [Plus Epsilon (Plus (Append 'a' 0) (Append 'b' 0))]
+aOrbStar = [Plus Epsilon (Plus (Cons 'a' 0) (Cons 'b' 0))]

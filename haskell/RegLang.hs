@@ -131,5 +131,8 @@ cutOffIfFixed (x:y:xs) = if x == y then [x] else x : cutOffIfFixed (y:xs)
 -- a
 a = [Append 'a' 1, Epsilon]
 
+-- (ab)*
+abStar = [Plus Epsilon (Append 'a' 1), Append 'b' 0]
+
 -- (a|b)*
-abStar = [Plus Epsilon (Plus (Append 'a' 0) (Append 'b' 0))]
+aOrbStar = [Plus Epsilon (Plus (Append 'a' 0) (Append 'b' 0))]

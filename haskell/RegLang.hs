@@ -1,3 +1,5 @@
+module RegLang where
+
 import Prelude hiding (iterate)
 -- ^ so we can implement iterate it ourselves as an example
 
@@ -81,11 +83,11 @@ type System = [RegLang]
 pointwise :: [a -> b] -> a -> [b]
 pointwise fs x = map (\f -> f x) fs
 
--- The bottom value in the products of Scott domains of regular languages
+-- The bottom value in the products of Scott domains of languages
 -- is an n-tuple of empty languages.
 -- We need a function to generate such a thing.
-bottomRegLangN :: System -> [Language]
-bottomRegLangN taus = replicate (length taus) []
+bottomLangN :: [a] -> [Language]
+bottomLangN taus = replicate (length taus) []
 
 -- iterate will implement a part of our least fixed point operator.
 -- We want to "infinitely" iterate a function over an initial value
@@ -124,7 +126,7 @@ denotSystem taus =
     $ iterate' (pointwise interps)
     -- ^ iterate' is *the same* as iterate, except it
     -- evaluates its argument each time (for efficiency)
-    $ bottomRegLangN taus
+    $ bottomLangN taus
     -- ^ we generate a list (n-tuple) of "enough" bottoms (empty language)
     -- where "enough" is  how many RegLangs we were given (because that's how many we need)
 
